@@ -6,7 +6,7 @@ use src\models\RequestHandler;
 
 class RequestHandCommand
 {
-    public function handle()
+    public function run()
     {
         $handler = new RequestHandler();
 

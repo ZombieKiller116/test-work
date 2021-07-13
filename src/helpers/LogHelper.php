@@ -1,22 +1,14 @@
 <?php
 
-
 namespace src\helpers;
 
+use LeadGenerator\Lead;
+use src\models\Log;
 
 class LogHelper
 {
-    public static function generateLeadsString(array $array): string
+    public static function writeLog(int $leadId, Lead $lead)
     {
-        $string = "";
-
-        foreach ($array as $item) {
-            $string .= $item['lead_id'] . '|';
-            $string .= $item['lead_category'] . '|';
-            $string .= $item['current_datetime'];
-            $string .= "\r\n";
-        }
-
-        return $string;
+        Log::write($leadId . '|' . $lead->categoryName . '|' . $lead->currentDatetime . "\r\n");
     }
 }

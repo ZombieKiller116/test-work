@@ -4,39 +4,29 @@ namespace src\models;
 
 use LeadGenerator\Generator;
 use LeadGenerator\Lead;
-use src\helpers\LeadHelper;
 use src\helpers\LogHelper;
 use src\interfaces\RequestHandlerInterface;
 
 class RequestHandler implements RequestHandlerInterface
 {
-    public $leads;
-
-    public function __destruct() {
-        $leadCount = count($this->leads);
-        echo "Было обработано $leadCount заявок \r\n";
-    }
-
     public function processing(int $applicationCounts)
     {
-        $generator = new Generator();
-
-        $generator->generateLeads($applicationCounts, function (Lead $lead) {
-            $lead->currentDatetime = date('d-m-Y H:i:s');
-            $this->leads[] = $lead;
-        });
-
-        try {
-            $this->logLeads();
-        } catch (\Exception $e) {
-            exit('При логировании заявок произошла ошибка!');
+        $workersCount = 500;
+        for ($i = 1; $i <= $workersCount; $i++) {
+            echo shell_exec("php " . __DIR__ . "/../run-worker.php " . $applicationCounts / $workersCount . ' ' . $workersCount . ' ' . $i . " >>" . __DIR__ . "/../logs/errors.log 2>&1 &");
         }
     }
 
-    public function logLeads()
+    public static function handleSimpleApplication($leadId)
     {
-        $leadsForLogging = LeadHelper::convertLeadsToOutputArray($this->leads);
-        $logText = LogHelper::generateLeadsString($leadsForLogging);
-        Log::write($logText);
+        sleep(2);
+
+        $generator = new Generator();
+
+        $generator->generateLeads(1, function (Lead $lead) use ($leadId) {
+            $lead->currentDatetime = date('d-m-Y H:i:s');
+
+            LogHelper::writeLog($leadId, $lead);
+        });
     }
 }
